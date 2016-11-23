@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:padding="@dimen/activity_horizontal_margin">
+
+
+    <TextView
+        android:text="1.grup(örn:yazar)"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/etFirst"
+        android:layout_margin="5dp"/>
+
+    <TextView
+        android:text="2.grup(örn:kitap)"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView3" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/etSecond"
+        android:layout_margin="5dp"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:text="İptal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bCancel"
+            android:layout_weight="1" />
+
+        <Button
+            android:text="Kaydet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bJustSave"
+            android:layout_weight="1" />
+    </LinearLayout>
+</LinearLayout>
