@@ -34,6 +34,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         setContentView(R.layout.activity_new_match);
         onFinishInflate();
 
+
     }
 
     public void newButtonOnClick(View view) {

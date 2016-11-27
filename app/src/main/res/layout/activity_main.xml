@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -8,16 +9,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.android.learnbymatching.activities.MainActivity">
-
-    <TextView
-        android:text="Ana Ekran"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textSize="18sp" />
+    tools:context="com.android.learnbymatching.activities.MainActivity"
+    android:background="#FFB059">
 
     <LinearLayout
         android:orientation="vertical"
@@ -27,21 +20,33 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"> </LinearLayout>
 
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/lvMain"
-        android:layout_below="@+id/llactivity_main" />
-
     <Button
         android:text=">"
         android:layout_width="50dp"
         android:layout_height="150dp"
-        android:id="@+id/button"
+        android:id="@+id/bNew"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:onClick="buttonOnClick" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:src="@android:drawable/ic_popup_sync"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="false"
+        android:onClick="refresh"
+        android:layout_alignParentStart="false"
+        android:id="@+id/imageButton" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/lvMain"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/imageButton" />
 
 </RelativeLayout>

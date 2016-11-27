@@ -17,6 +17,7 @@
         </activity>
         <activity android:name=".activities.NewMatchActivity" />
         <activity android:name=".activities.GameActivity" />
+        <activity android:name=".ProjectActivity"></activity>
     </application>
 
 </manifest>

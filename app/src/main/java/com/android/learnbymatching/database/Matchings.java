@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Lenovo on 22.11.2016.
  *
@@ -90,7 +93,6 @@ public class Matchings extends SQLiteOpenHelper {
 
         Project project = new Project();
 
-        project.setId(c.getInt(c.getColumnIndex(KEY_ID)));
         project.setName(c.getString(c.getColumnIndex(KEY_NAME)));
         project.setCreate_date(c.getString(c.getColumnIndex(KEY_CREATE_DATE)));
 
@@ -134,5 +136,32 @@ public class Matchings extends SQLiteOpenHelper {
         matchs.setCreate_date(c.getString(c.getColumnIndex(KEY_CREATE_DATE)));
 
         return matchs;
+    }
+
+    public List<Project> getAllProjects()
+    {
+        List<Project> projects = new ArrayList<Project>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_PROJECTS;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if (c.moveToFirst())
+        {
+            do
+            {
+                Project p = new Project();
+
+                p.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                p.setName(c.getString(c.getColumnIndex(KEY_NAME)));
+                p.setCreate_date(c.getString(c.getColumnIndex(KEY_CREATE_DATE)));
+
+                projects.add(p);
+            } while (c.moveToNext());
+        }
+
+        return projects;
     }
 }

@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.learnbymatching.ProjectActivity;
 import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
 import com.android.learnbymatching.database.Matchs;
@@ -23,14 +24,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
+
+import static android.R.attr.data;
 
 // بِسْــــــــــــــــــــــمِ اﷲِارَّحْمَنِ ارَّحِيم
 
 public class MainActivity extends AppCompatActivity {
 
     private ListView lvMain;
-    private TextView tv;
+    private MyAdapter adapter;
+    private List<String> strings;
+    List<Project> projects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,33 +42,56 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         lvMain = (ListView) findViewById(R.id.lvMain);
-        tv = (TextView) findViewById(R.id.textView);
 
-        List<String> ourList = new ArrayList<>();
+        findViewById(R.id.bNew).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v)
+            {
+                startActivity(new Intent(MainActivity.this, ProjectActivity.class));
+                return false;
+            }
+        });
 
-        String s = "";
-
-        for (int i = 0; i < ourList.size(); i++)
-        {
-            s += ourList.get(i) + "\n";
-        }
-
-        tv.setText(s);
-
-        String myText;
-
-        Matchings db = new Matchings(MainActivity.this);
-        Matchs myMatchs = db.getMatchs(15);
-
-        myText = myMatchs.getId() + " " + myMatchs.getFirst() + " " + myMatchs.getSecond() + " " + myMatchs.getCreate_date();
-
-        Log.d("SQLiteOpenHelper", myText);
 
         String[] tArray = {"title 1", "title 2"};
-        String[] dateArray = {"date 1", "date 2"};
-        String[] raArray = {"random 1", "random 2"};
 
-        lvMain.setAdapter(new MyAdapter(MainActivity.this, tArray, dateArray, raArray));
+        Matchings db = new Matchings(this);
+        projects = db.getAllProjects();
+        db.close();
+
+         strings = new ArrayList<>();
+
+        for (int i = 0; i < projects.size(); i++)
+        {
+            Project pro = projects.get(i);
+            String data = pro.getName();
+
+            strings.add(data);
+        }
+
+        adapter = new MyAdapter(MainActivity.this, strings);
+        lvMain.setAdapter(adapter);
+    }
+
+    public void refresh(View v)
+    {
+        Matchings db = new Matchings(this);
+        projects = db.getAllProjects();
+        db.close();
+
+        strings = new ArrayList<>();
+
+        for (int i = 0; i < projects.size(); i++)
+        {
+            Project pro = projects.get(i);
+            String data = pro.getName();
+
+            strings.add(data);
+        }
+
+        adapter = new MyAdapter(this, strings);
+        adapter.notifyDataSetChanged();
+        lvMain.setAdapter(adapter);
     }
 
     public void buttonOnClick(View view) {
@@ -105,24 +132,23 @@ public class MainActivity extends AppCompatActivity {
 
     private class MyAdapter extends BaseAdapter {
 
-        private String[] array, array2, array3;
+        // private String[] array, array2, array3;
+        private List<String> arrayList = new ArrayList<>();
         private Context context;
 
-        MyAdapter(Context context, String[] array, String[] array2, String[] array3) {
+        MyAdapter(Context context, List<String> arrayList) {
             this.context = context;
-            this.array = array;
-            this.array2 = array2;
-            this.array3 = array3;
+            this.arrayList = arrayList;
         }
 
         @Override
         public int getCount() {
-            return array.length;
+            return arrayList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return array[position];
+            return arrayList.get(position);
         }
 
         @Override
@@ -139,13 +165,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             TextView tvMatchingTitle = (TextView) convertView.findViewById(R.id.tvMatchingTitle);
-            tvMatchingTitle.setText(array[position]);
+            tvMatchingTitle.setText(arrayList.get(position));
 
             TextView tvMatchingDate = (TextView) convertView.findViewById(R.id.tvMatchingDate);
-            tvMatchingDate.setText(array2[position]);
+           // tvMatchingDate.setText(array2[position]);
 
             TextView tvMatchingRandom = (TextView) convertView.findViewById(R.id.tvMatchingRandom);
-            tvMatchingRandom.setText(array3[position]);
+            //tvMatchingRandom.setText(array3[position]);
 
             ImageButton ibPicture = (ImageButton) convertView.findViewById(R.id.ibPicture);
             ibPicture.setOnClickListener(new View.OnClickListener() {
@@ -158,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String getFullTime(){ // tarih + saat gösterir..
+    public static String getFullTime(){ // tarih + saat gösterir..
         String fullTime;
         Calendar c = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
