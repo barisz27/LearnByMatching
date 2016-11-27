@@ -1,31 +1,29 @@
 package com.android.learnbymatching.activities;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
-import com.android.learnbymatching.dialog.NewMatchDialogFragment;
+import com.android.learnbymatching.database.Matchs;
+import com.android.learnbymatching.database.Project;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import static com.android.learnbymatching.R.id.bDelete;
-import static com.android.learnbymatching.R.id.lvrTvName;
+import java.util.List;
+import java.util.Set;
 
 // بِسْــــــــــــــــــــــمِ اﷲِارَّحْمَنِ ارَّحِيم
 
@@ -42,13 +40,25 @@ public class MainActivity extends AppCompatActivity {
         lvMain = (ListView) findViewById(R.id.lvMain);
         tv = (TextView) findViewById(R.id.textView);
 
-        Matchings entry = new Matchings(MainActivity.this);
-        entry.open();
-        entry.createEntry("time", "isim", "tarih", 1, "deger", 2, "deger");
-        String s = entry.getData();
-        entry.close();
+        List<String> ourList = new ArrayList<>();
+
+        String s = "";
+
+        for (int i = 0; i < ourList.size(); i++)
+        {
+            s += ourList.get(i) + "\n";
+        }
 
         tv.setText(s);
+
+        String myText;
+
+        Matchings db = new Matchings(MainActivity.this);
+        Matchs myMatchs = db.getMatchs(15);
+
+        myText = myMatchs.getId() + " " + myMatchs.getFirst() + " " + myMatchs.getSecond() + " " + myMatchs.getCreate_date();
+
+        Log.d("SQLiteOpenHelper", myText);
 
         String[] tArray = {"title 1", "title 2"};
         String[] dateArray = {"date 1", "date 2"};
@@ -60,6 +70,37 @@ public class MainActivity extends AppCompatActivity {
     public void buttonOnClick(View view) {
         Intent i = new Intent(MainActivity.this, NewMatchActivity.class);
         startActivity(i);
+    }
+
+    public void bOnClick(View view)
+    {
+        Project myProject = new Project();
+        myProject.setId(1);
+        myProject.setName("Barışın projesi");
+        myProject.setCreate_date(getFullTime());
+
+        // eşleşme
+        Matchs myMatchs = new Matchs();
+        myMatchs.setFirst("şinasi");
+        myMatchs.setSecond("şair evlenmesi");
+        myMatchs.setCreate_date(getFullTime());
+        myMatchs.setId(2);
+
+        Matchings db = new Matchings(this);
+        db.createProject(myProject);
+        db.createMatchs(myMatchs);
+        db.close();
+
+        Project p = db.getProject(1);
+
+        String s = p.getId() + " " + p.getName() + " " + p.getCreate_date();
+
+        TextView tv = new TextView(this);
+        tv.setText(s);
+
+        Dialog d = new Dialog(this);
+        d.setContentView(tv);
+        d.show();
     }
 
     private class MyAdapter extends BaseAdapter {
@@ -116,4 +157,14 @@ public class MainActivity extends AppCompatActivity {
             return convertView;
         }
     }
+
+    private String getFullTime(){ // tarih + saat gösterir..
+        String fullTime;
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        fullTime = dateFormat.format(c.getTime());
+
+        return fullTime;
+    }
+
 }

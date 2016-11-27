@@ -14,6 +14,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.learnbymatching.R;
+import com.android.learnbymatching.database.Matchings;
+import com.android.learnbymatching.database.Matchs;
 import com.android.learnbymatching.dialog.NewMatchDialogFragment;
 import com.android.learnbymatching.dialog.NewMatchUpdateListener;
 
@@ -36,7 +38,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
 
     public void newButtonOnClick(View view) {
         NewMatchDialogFragment dialog = NewMatchDialogFragment.newInstance();
-        dialog.show(getSupportFragmentManager(), "NewMatchDialogFragment");
+        dialog.show(getFragmentManager(), "NewMatchDialogFragment");
     }
 
     // my interface
@@ -55,6 +57,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
     public void onCreateNew(String first, String second) {
         addToListAndUpdate(first, firstArray);
         addToListAndUpdate(second, secondArray);
+        saveToDb(first, second, getFullTime(), firstArray.size());
     }
 
     private void onFinishInflate() {
@@ -134,7 +137,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
                 public void onClick(View v) {
                     NewMatchDialogFragment dialogFragment =
                             NewMatchDialogFragment.newInstance(position, firstArray.get(position), secondArray.get(position));
-                    dialogFragment.show(getSupportFragmentManager(), "NewMatchDialogFragment");
+                    dialogFragment.show(getFragmentManager(), "NewMatchDialogFragment");
                 }
             });
 
@@ -162,5 +165,20 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         fullTime = dateFormat.format(c.getTime());
 
         return fullTime;
+    }
+
+    private long saveToDb(String first, String second, String date, int position) {
+        Matchs myMatchs = new Matchs();
+        myMatchs.setId(position);
+        myMatchs.setFirst(first);
+        myMatchs.setSecond(second);
+        myMatchs.setCreate_date(date);
+
+        Matchings db = new Matchings(NewMatchActivity.this);
+
+        long r = db.createMatchs(myMatchs);
+        db.close();
+
+        return r;
     }
 }
