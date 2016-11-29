@@ -164,4 +164,55 @@ public class Matchings extends SQLiteOpenHelper {
 
         return projects;
     }
+
+    public List<Matchs> getMatchByDate(String create_date)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        List<Matchs> matchs = new ArrayList<>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_MATCHS + " WHERE " + KEY_CREATE_DATE + " LIKE '" + create_date + "%'";
+
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if (c.moveToFirst())
+        {
+            do
+            {
+                Matchs match = new Matchs();
+
+                match.setId(c.getInt(c.getColumnIndex(KEY_ID)));
+                match.setFirst(c.getString(c.getColumnIndex(KEY_MATCH)));
+                match.setSecond(c.getString(c.getColumnIndex(KEY_MATCH)));
+                match.setCreate_date(c.getString(c.getColumnIndex(KEY_CREATE_DATE)));
+
+                matchs.add(match);
+            } while (c.moveToNext());
+        }
+
+        return matchs;
+    }
+
+    public int updateMatchs(Matchs matchs, String match) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_MATCH, matchs.getFirst() + "-" + matchs.getSecond());
+
+        // updating row
+        return db.update(TABLE_MATCHS, values, KEY_MATCH + " = ?",
+                new String[] { match });
+    }
+
+    public void deleteProject(String create_date)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(TABLE_PROJECTS, KEY_CREATE_DATE + " = ?",
+                new String[] { create_date });
+
+        db.delete(TABLE_MATCHS, KEY_CREATE_DATE + " = ?",
+                new String[] { create_date });
+        Log.d(TAG, "Proje silindi");
+    }
 }

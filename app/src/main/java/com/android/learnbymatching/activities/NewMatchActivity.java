@@ -1,9 +1,12 @@
 package com.android.learnbymatching.activities;
 
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,21 +15,27 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
 import com.android.learnbymatching.database.Matchs;
+import com.android.learnbymatching.database.Project;
 import com.android.learnbymatching.dialog.NewMatchDialogFragment;
 import com.android.learnbymatching.dialog.NewMatchUpdateListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
-public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdateListener, View.OnLongClickListener {
+public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdateListener {
 
     private ArrayList<String> firstArray, secondArray;
     private MyAdapter adapter;
+    private Project project;
+    private ListView l1, l2;
+    private List<Matchs> myMatchs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +43,16 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         setContentView(R.layout.activity_new_match);
         onFinishInflate();
 
+        project = new Project();
+        project.setName(getIntent().getExtras().getString("name"));
+        project.setCreate_date(getIntent().getExtras().getString("date"));
 
+        // Log.d("baris", project.getName() + " " + date);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(project.getName());
+        actionBar.setSubtitle(project.getCreate_date());
+        addListFromDb(project.getCreate_date());
     }
 
     public void newButtonOnClick(View view) {
@@ -45,12 +63,23 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
     // my interface
     @Override
     public void onUpdate(int position, String first, String second) {
-        updateListWithNewValue(position, first, firstArray);
-        updateListWithNewValue(position, second, secondArray);
-        // ilk listede ikinci listeye yeni değer
-        // girildiğinde listenin update olma sorunu çözen kod
-        adapter = new MyAdapter(this, secondArray);
-        adapter.notifyDataSetChanged();
+        updateToDb(position, first, second);
+    }
+
+    private void updateToDb(int position, String first, String second)
+    {
+        Matchs matchs = new Matchs();
+        matchs.setFirst(first);
+        matchs.setSecond(second);
+        matchs.setCreate_date(project.getCreate_date());
+
+        Matchings db = new Matchings(NewMatchActivity.this);
+        db.updateMatchs(matchs, myMatchs.get(position).getFirst());
+
+        firstArray = new ArrayList<>();
+        secondArray = new ArrayList<>();
+
+        addListFromDb(matchs.getCreate_date());
     }
 
     // my other interface
@@ -58,24 +87,19 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
     public void onCreateNew(String first, String second) {
         addToListAndUpdate(first, firstArray);
         addToListAndUpdate(second, secondArray);
-        saveToDb(first, second, getFullTime(), firstArray.size());
+        saveToDb(first, second);
     }
 
     private void onFinishInflate() {
-        Button button = (Button) findViewById(R.id.button2);
-        button.setOnLongClickListener(this);
-        ListView l1 = (ListView) findViewById(R.id.l1);
-        ListView l2 = (ListView) findViewById(R.id.l2);
+        l1 = (ListView) findViewById(R.id.l1);
+        l2 = (ListView) findViewById(R.id.l2);
 
         firstArray = new ArrayList<>();
         secondArray = new ArrayList<>();
-
-        l1.setAdapter(new MyAdapter(this, firstArray));
-        l2.setAdapter(new MyAdapter(this, secondArray));
     }
 
-    @Override
-    public boolean onLongClick(View v) {
+    public void startGameActivity(View v)
+    {
         Intent i = new Intent(this, GameActivity.class);
 
         Bundle mBundle = new Bundle();
@@ -84,7 +108,6 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
 
         i.putExtras(mBundle);
         startActivity(i);
-        return true;
     }
 
     private class MyAdapter extends BaseAdapter {
@@ -159,27 +182,39 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         adapter.notifyDataSetChanged();
     }
 
-    private String getFullTime(){ // tarih + saat gösterir..
-        String fullTime;
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        fullTime = dateFormat.format(c.getTime());
-
-        return fullTime;
-    }
-
-    private long saveToDb(String first, String second, String date, int position) {
+    private long saveToDb(String first, String second) {
         Matchs myMatchs = new Matchs();
-        myMatchs.setId(position);
         myMatchs.setFirst(first);
         myMatchs.setSecond(second);
-        myMatchs.setCreate_date(date);
+        myMatchs.setCreate_date(project.getCreate_date());
 
         Matchings db = new Matchings(NewMatchActivity.this);
 
         long r = db.createMatchs(myMatchs);
         db.close();
 
+        Toast.makeText(NewMatchActivity.this, "Eklendi", Toast.LENGTH_SHORT).show();
+
         return r;
+    }
+
+    private void addListFromDb(String createDate)
+    {
+        Matchings db = new Matchings(NewMatchActivity.this);
+
+        myMatchs = db.getMatchByDate(project.getCreate_date());
+
+        for (int i = 0; i < myMatchs.size(); i++)
+        {
+            int whereShortLine = myMatchs.get(i).getFirst().indexOf("-");
+            String first = myMatchs.get(i).getFirst().substring(0, whereShortLine);
+            String second = myMatchs.get(i).getFirst().substring(whereShortLine + 1, myMatchs.get(i).getFirst().length());
+
+            firstArray.add(i, first);
+            secondArray.add(i, second);
+        }
+
+        l1.setAdapter(new MyAdapter(this, firstArray));
+        l2.setAdapter(new MyAdapter(this, secondArray));
     }
 }

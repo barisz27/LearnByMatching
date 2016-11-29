@@ -10,13 +10,33 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.android.learnbymatching.activities.NewMatchActivity">
 
-    <Button
-        android:text="Yeni oluştur"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:id="@+id/button2"
-        android:onClick="newButtonOnClick"
-        android:layout_marginBottom="10dp"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        >
+
+        <Button
+            android:text="Yeni oluştur"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:drawableLeft="@android:drawable/ic_menu_add"
+            android:onClick="newButtonOnClick"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:text="Başla"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:drawableLeft="@android:drawable/ic_media_play"
+            android:onClick="startGameActivity"
+            android:layout_weight="1"
+            />
+
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:orientation="vertical"

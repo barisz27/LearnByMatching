@@ -1,23 +1,26 @@
 package com.android.learnbymatching.activities;
 
-import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.learnbymatching.ProjectActivity;
 import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
-import com.android.learnbymatching.database.Matchs;
 import com.android.learnbymatching.database.Project;
 
 import java.text.SimpleDateFormat;
@@ -25,16 +28,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import static android.R.attr.data;
 
 // بِسْــــــــــــــــــــــمِ اﷲِارَّحْمَنِ ارَّحِيم
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private ListView lvMain;
     private MyAdapter adapter;
-    private List<String> strings;
-    List<Project> projects;
+    private List<String> strings, dateStrings;
+    private List<Project> projects;
+    private String deleteDate = null;
+    private TextView tvNoProject;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,102 +48,112 @@ public class MainActivity extends AppCompatActivity {
 
         lvMain = (ListView) findViewById(R.id.lvMain);
 
-        findViewById(R.id.bNew).setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v)
-            {
-                startActivity(new Intent(MainActivity.this, ProjectActivity.class));
-                return false;
-            }
-        });
-
-
-        String[] tArray = {"title 1", "title 2"};
-
         Matchings db = new Matchings(this);
         projects = db.getAllProjects();
         db.close();
 
-         strings = new ArrayList<>();
+        if (projects.size() > 0)
+        {
+            TextView tvNoProject = (TextView) findViewById(R.id.tvNoProject);
+            tvNoProject.setVisibility(View.INVISIBLE);
+        }
+
+        strings = new ArrayList<>();
+        dateStrings = new ArrayList<>();
 
         for (int i = 0; i < projects.size(); i++)
         {
             Project pro = projects.get(i);
             String data = pro.getName();
+            String date = pro.getCreate_date();
 
             strings.add(data);
+            dateStrings.add(date);
         }
 
-        adapter = new MyAdapter(MainActivity.this, strings);
+        adapter = new MyAdapter(MainActivity.this, strings, dateStrings);
         lvMain.setAdapter(adapter);
     }
 
-    public void refresh(View v)
+    private void refresh()
     {
         Matchings db = new Matchings(this);
         projects = db.getAllProjects();
         db.close();
 
+        if (projects.size() != 0)
+        {
+            tvNoProject = (TextView) findViewById(R.id.tvNoProject);
+            tvNoProject.setVisibility(View.INVISIBLE);
+        }
+
         strings = new ArrayList<>();
+        dateStrings = new ArrayList<>();
 
         for (int i = 0; i < projects.size(); i++)
         {
             Project pro = projects.get(i);
             String data = pro.getName();
+            String date = pro.getCreate_date();
 
             strings.add(data);
+            dateStrings.add(date);
         }
 
-        adapter = new MyAdapter(this, strings);
+        adapter = new MyAdapter(this, strings, dateStrings);
         adapter.notifyDataSetChanged();
         lvMain.setAdapter(adapter);
     }
 
-    public void buttonOnClick(View view) {
-        Intent i = new Intent(MainActivity.this, NewMatchActivity.class);
-        startActivity(i);
-    }
-
-    public void bOnClick(View view)
+    @Override
+    public boolean onMenuItemClick(MenuItem item)
     {
-        Project myProject = new Project();
-        myProject.setId(1);
-        myProject.setName("Barışın projesi");
-        myProject.setCreate_date(getFullTime());
+        switch (item.getItemId())
+        {
+            case R.id.menu_delete:
+                if (deleteDate != null)
+                {
+                    new android.app.AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Proje siliniyor..")
+                                    .setCancelable(false)
+                                    .setMessage("Silmek istediğinize emin misiniz?")
+                                    .setPositiveButton("Evet", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            Matchings db = new Matchings(MainActivity.this);
+                                            db.deleteProject(deleteDate);
+                                            dialogInterface.dismiss();
+                                            refresh();
+                                            if (projects.size() == 0){
+                                                tvNoProject.setVisibility(View.VISIBLE);
+                                            }
+                                        }
+                                    }).setNegativeButton("İptal", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    }).show();
 
-        // eşleşme
-        Matchs myMatchs = new Matchs();
-        myMatchs.setFirst("şinasi");
-        myMatchs.setSecond("şair evlenmesi");
-        myMatchs.setCreate_date(getFullTime());
-        myMatchs.setId(2);
-
-        Matchings db = new Matchings(this);
-        db.createProject(myProject);
-        db.createMatchs(myMatchs);
-        db.close();
-
-        Project p = db.getProject(1);
-
-        String s = p.getId() + " " + p.getName() + " " + p.getCreate_date();
-
-        TextView tv = new TextView(this);
-        tv.setText(s);
-
-        Dialog d = new Dialog(this);
-        d.setContentView(tv);
-        d.show();
+                }
+                return true;
+            default:
+                return false;
+        }
     }
+
 
     private class MyAdapter extends BaseAdapter {
 
         // private String[] array, array2, array3;
         private List<String> arrayList = new ArrayList<>();
+        private List<String> dateList = new ArrayList<>();
         private Context context;
 
-        MyAdapter(Context context, List<String> arrayList) {
+        MyAdapter(Context context, List<String> arrayList, List<String> dateList) {
             this.context = context;
             this.arrayList = arrayList;
+            this.dateList = dateList;
         }
 
         @Override
@@ -161,22 +176,46 @@ public class MainActivity extends AppCompatActivity {
 
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-                convertView = (View) inflater.inflate(R.layout.main_listview_row, null);
+                convertView = inflater.inflate(R.layout.main_listview_row, null);
             }
 
             TextView tvMatchingTitle = (TextView) convertView.findViewById(R.id.tvMatchingTitle);
             tvMatchingTitle.setText(arrayList.get(position));
 
             TextView tvMatchingDate = (TextView) convertView.findViewById(R.id.tvMatchingDate);
-           // tvMatchingDate.setText(array2[position]);
-
-            TextView tvMatchingRandom = (TextView) convertView.findViewById(R.id.tvMatchingRandom);
-            //tvMatchingRandom.setText(array3[position]);
+            tvMatchingDate.setText(dateList.get(position));
 
             ImageButton ibPicture = (ImageButton) convertView.findViewById(R.id.ibPicture);
             ibPicture.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                }
+            });
+
+            final ImageView ivPopup = (ImageView) convertView.findViewById(R.id.ivPopup);
+            ivPopup.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v)
+                {
+                    deleteDate = projects.get(position).getCreate_date();
+                    showPopupMenu(ivPopup);
+                }
+            });
+
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v)
+                {
+                    Matchings db = new Matchings(MainActivity.this);
+
+                    Project p = db.getProject(position + 1);
+
+                    Intent i = new Intent(MainActivity.this, NewMatchActivity.class);
+                    i.putExtra("name", p.getName());
+                    i.putExtra("date", p.getCreate_date());
+
+
+                    startActivity(i);
                 }
             });
 
@@ -193,4 +232,36 @@ public class MainActivity extends AppCompatActivity {
         return fullTime;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_refresh) {
+            refresh();
+            return false;
+        } else if (item.getItemId() == R.id.menu_newproject) {
+            startActivity(new Intent(MainActivity.this, ProjectActivity.class));
+            return false;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void showPopupMenu(View v)
+    {
+        PopupMenu pm = new PopupMenu(this, v);
+        MenuInflater inflater = pm.getMenuInflater();
+        inflater.inflate(R.menu.contextual_action_menu, pm.getMenu());
+        pm.setOnMenuItemClickListener(this);
+        pm.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
+    }
 }

@@ -1,14 +1,20 @@
-package com.android.learnbymatching;
+package com.android.learnbymatching.activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.learnbymatching.activities.MainActivity;
+import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
 import com.android.learnbymatching.database.Project;
 
@@ -31,10 +37,12 @@ public class ProjectActivity extends AppCompatActivity {
 
                 String input = etProjectName.getText().toString();
 
+                String create_date = MainActivity.getFullTime();
+
                 Project project = new Project();
                 project.setId(0);
                 project.setName(input);
-                project.setCreate_date(MainActivity.getFullTime());
+                project.setCreate_date(create_date);
 
                 Matchings db = new Matchings(ProjectActivity.this);
                 db.createProject(project);
