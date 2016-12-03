@@ -2,14 +2,16 @@ package com.android.learnbymatching.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.learnbymatching.R;
 
@@ -17,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static android.R.id.list;
-import static android.view.View.Z;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -56,6 +56,8 @@ public class GameActivity extends AppCompatActivity {
                 }
             });
             buttonList.add(myButton);
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.move);
+            myButton.startAnimation(animation);
         }
 
         for (int i = 0; i < firstArray.size(); i++)
@@ -82,16 +84,27 @@ public class GameActivity extends AppCompatActivity {
                     if (chosed[0] != null) {
                         if (getStringPos(chosed[0], 1) == getStringPos(chosed[1], 2)) {
                             isChosed[0] = false;
-                            Toast.makeText(GameActivity.this, "Doğru", Toast.LENGTH_SHORT).show();
+                            // .makeText(GameActivity.this, "Doğru", Toast.LENGTH_SHORT).show();
                             myButton.setEnabled(false);
                             clearChosedArray();
                         } else {
                             failCount++;
                             isChosed[0] = false;
-                            Toast.makeText(GameActivity.this, "Yanlış", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(GameActivity.this, "Yanlış", Toast.LENGTH_SHORT).show();
                             List<View> bArray = findViewWithTagRecursively((ViewGroup) findViewById(R.id.llGroup1), "Group1" + getStringPos(chosed[0], 1));
-                            Button b = (Button) bArray.get(0);
+                            final Button b = (Button) bArray.get(0);
+                            List<View> bArr = findViewWithTagRecursively((ViewGroup) findViewById(R.id.llGroup2), "Group2" + getStringPos(chosed[1], 2));
+                            final Button bB = (Button) bArr.get(0);
                             b.setEnabled(true);
+
+                            Log.d("GameActivity", b.getText().toString() + " " + bB.getText().toString());
+
+                            final int backupColor = b.getSolidColor();
+
+                            Animation shakeAnim = AnimationUtils.loadAnimation(GameActivity.this, R.anim.shake);
+                            b.startAnimation(shakeAnim);
+                            bB.startAnimation(shakeAnim);
+
                             clearChosedArray();
                         }
                     }
@@ -108,9 +121,12 @@ public class GameActivity extends AppCompatActivity {
                                 .setCancelable(false)
                                 .show();
                     }
+
+
                 }
             });
-
+            Animation animation = AnimationUtils.loadAnimation(GameActivity.this, R.anim.move_right);
+            myButton.startAnimation(animation);
             buttonList.add(myButton);
         }
 

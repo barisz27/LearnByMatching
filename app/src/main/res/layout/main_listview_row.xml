@@ -37,6 +37,7 @@
                 android:id="@+id/ivPopup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_menu_manage" />
 
         </LinearLayout>

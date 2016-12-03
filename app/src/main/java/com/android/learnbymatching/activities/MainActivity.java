@@ -3,7 +3,6 @@ package com.android.learnbymatching.activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
@@ -13,6 +12,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -21,23 +22,28 @@ import android.widget.TextView;
 
 import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
+import com.android.learnbymatching.database.Matchs;
 import com.android.learnbymatching.database.Project;
+import com.android.learnbymatching.dialog.RenameProjectDialogFragment;
+import com.android.learnbymatching.prefs.Prefs;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 
 // بِسْــــــــــــــــــــــمِ اﷲِارَّحْمَنِ ارَّحِيم
 
-public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener, RenameProjectDialogFragment.RenameUpdateListener {
 
     private ListView lvMain;
     private MyAdapter adapter;
     private List<String> strings, dateStrings;
     private List<Project> projects;
     private String deleteDate = null;
+    private String deleteName = null;
     private TextView tvNoProject;
 
 
@@ -50,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         Matchings db = new Matchings(this);
         projects = db.getAllProjects();
-        db.close();
 
         if (projects.size() > 0)
         {
@@ -137,11 +142,26 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
                 }
                 return true;
+            case R.id.menu_rename:
+                if (deleteDate != null)
+                {
+                    showRenameDialog(deleteDate);
+                }
+                return true;
             default:
                 return false;
         }
     }
 
+    @Override
+    public void onRename(String date, String newName)
+    {
+        Matchings db = new Matchings(MainActivity.this);
+        db.updateProject(date, newName);
+        db.close();
+
+        refresh();
+    }
 
     private class MyAdapter extends BaseAdapter {
 
@@ -197,8 +217,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 @Override
                 public void onClick(View v)
                 {
-                    deleteDate = projects.get(position).getCreate_date();
-                    showPopupMenu(ivPopup);
+                    deleteName = projects.get(position).getName();
+                    showPopupMenu(ivPopup,  projects.get(position).getCreate_date());
                 }
             });
 
@@ -246,12 +266,21 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         } else if (item.getItemId() == R.id.menu_newproject) {
             startActivity(new Intent(MainActivity.this, ProjectActivity.class));
             return false;
+        } else if (item.getItemId() == R.id.menu_shake) {
+            Animation anim = AnimationUtils.loadAnimation(this, R.anim.shake);
+            lvMain.startAnimation(anim);
+        } else if (item.getItemId() == R.id.menu_prefs) {
+            startActivity(new Intent(MainActivity.this, Prefs.class));
+        } else if (item.getItemId() == R.id.menu_move) {
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.move);
+            lvMain.startAnimation(animation);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void showPopupMenu(View v)
+    public void showPopupMenu(View v, String date)
     {
+        deleteDate = date;
         PopupMenu pm = new PopupMenu(this, v);
         MenuInflater inflater = pm.getMenuInflater();
         inflater.inflate(R.menu.contextual_action_menu, pm.getMenu());
@@ -263,5 +292,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onResume() {
         super.onResume();
         refresh();
+    }
+
+    private void showRenameDialog(String project_date){
+        RenameProjectDialogFragment dialogFragment = RenameProjectDialogFragment.newInstance(project_date, deleteName);
+        dialogFragment.show(getFragmentManager(), "RenameProjectDialogFragment");
     }
 }

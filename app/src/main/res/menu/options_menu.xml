@@ -14,4 +14,17 @@
         app:showAsAction="ifRoom"
         android:title="New Project" />
 
+    <item
+        android:id="@+id/menu_shake"
+        android:title="Shake now" />
+
+    <item
+        android:id="@+id/menu_move"
+        android:title="Move now" />
+
+    <item
+        android:id="@+id/menu_prefs"
+        android:title="Preferences" />
+
+
 </menu>

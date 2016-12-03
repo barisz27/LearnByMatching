@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -28,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdateListener {
 
@@ -35,7 +38,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
     private MyAdapter adapter;
     private Project project;
     private ListView l1, l2;
-    private List<Matchs> myMatchs;
+    private List<Matchs> myMatchsArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +77,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         matchs.setCreate_date(project.getCreate_date());
 
         Matchings db = new Matchings(NewMatchActivity.this);
-        db.updateMatchs(matchs, myMatchs.get(position).getFirst());
+        db.updateMatchs(matchs, myMatchsArray.get(position).getFirst());
 
         firstArray = new ArrayList<>();
         secondArray = new ArrayList<>();
@@ -85,9 +88,8 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
     // my other interface
     @Override
     public void onCreateNew(String first, String second) {
-        addToListAndUpdate(first, firstArray);
-        addToListAndUpdate(second, secondArray);
         saveToDb(first, second);
+        addListFromDb(project.getCreate_date());
     }
 
     private void onFinishInflate() {
@@ -143,19 +145,10 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
                 convertView = (View) inflater.inflate(R.layout.listview_row, null);
             }
 
-            TextView lvrTvName = (TextView) convertView.findViewById(R.id.lvrTvName);
+            final TextView lvrTvName = (TextView) convertView.findViewById(R.id.lvrTvName);
             lvrTvName.setText(array.get(position));
 
-            ImageButton bDelete = (ImageButton) convertView.findViewById(R.id.bDelete);
-            bDelete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    array.remove(position);
-                    notifyDataSetChanged();
-                }
-            });
-
-            View card = convertView.findViewById(R.id.card);
+            final View card = convertView.findViewById(R.id.card);
             card.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -165,20 +158,42 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
                 }
             });
 
+            ImageButton bDelete = (ImageButton) convertView.findViewById(R.id.bDelete);
+            bDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    deleteFromDb(myMatchsArray.get(position).getFirst());
+                    Log.d("NewMatchActivity", position + "");
+
+                }
+            });
+
             return convertView;
         }
     }
 
-    private void addToListAndUpdate(String item, ArrayList<String> list) {
-        list.add(item);
-        adapter = new MyAdapter(this, list);
-        adapter.notifyDataSetChanged();
-    }
+    private void deleteFromDb(String name) {
+        Matchings db = new Matchings(NewMatchActivity.this);
+        db.deleteMatchs(name);
+        myMatchsArray = new ArrayList<>();
+        myMatchsArray = db.getMatchByDate(project.getCreate_date());
+        firstArray.clear();
+        secondArray.clear();
 
-    private void updateListWithNewValue(int position, String first, ArrayList<String> list) {
-        list.remove(position);
-        list.add(position, first);
-        adapter = new MyAdapter(this, list);
+        for (int i = 0; i < myMatchsArray.size(); i++)
+        {
+            int whereShortLine = myMatchsArray.get(i).getFirst().indexOf("-");
+            String first = myMatchsArray.get(i).getFirst().substring(0, whereShortLine);
+            String second = myMatchsArray.get(i).getFirst().substring(whereShortLine + 1, myMatchsArray.get(i).getFirst().length());
+
+            firstArray.add(i, first);
+            secondArray.add(i, second);
+        }
+        adapter = new MyAdapter(this, firstArray);
+        l1.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        adapter = new MyAdapter(this, secondArray);
+        l2.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
 
@@ -202,13 +217,15 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
     {
         Matchings db = new Matchings(NewMatchActivity.this);
 
-        myMatchs = db.getMatchByDate(project.getCreate_date());
+        myMatchsArray = db.getMatchByDate(project.getCreate_date());
+        firstArray.clear();
+        secondArray.clear();
 
-        for (int i = 0; i < myMatchs.size(); i++)
+        for (int i = 0; i < myMatchsArray.size(); i++)
         {
-            int whereShortLine = myMatchs.get(i).getFirst().indexOf("-");
-            String first = myMatchs.get(i).getFirst().substring(0, whereShortLine);
-            String second = myMatchs.get(i).getFirst().substring(whereShortLine + 1, myMatchs.get(i).getFirst().length());
+            int whereShortLine = myMatchsArray.get(i).getFirst().indexOf("-");
+            String first = myMatchsArray.get(i).getFirst().substring(0, whereShortLine);
+            String second = myMatchsArray.get(i).getFirst().substring(whereShortLine + 1, myMatchsArray.get(i).getFirst().length());
 
             firstArray.add(i, first);
             secondArray.add(i, second);
@@ -217,4 +234,5 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         l1.setAdapter(new MyAdapter(this, firstArray));
         l2.setAdapter(new MyAdapter(this, secondArray));
     }
+
 }

@@ -204,6 +204,14 @@ public class Matchings extends SQLiteOpenHelper {
                 new String[] { match });
     }
 
+    public int deleteMatchs(String match) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // updating row
+        return db.delete(TABLE_MATCHS, KEY_MATCH + " = ?",
+                new String[] { match });
+    }
+
     public void deleteProject(String create_date)
     {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -214,5 +222,17 @@ public class Matchings extends SQLiteOpenHelper {
         db.delete(TABLE_MATCHS, KEY_CREATE_DATE + " = ?",
                 new String[] { create_date });
         Log.d(TAG, "Proje silindi");
+    }
+
+    public long updateProject(String project_date, String newValue)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_NAME, newValue);
+
+        // updating row
+        return db.update(TABLE_PROJECTS, values, KEY_CREATE_DATE + " = ?",
+                new String[] { project_date });
     }
 }
