@@ -40,7 +40,10 @@ public class GameActivity extends AppCompatActivity {
         int[] randomArrangement = generateRandomArray(firstArray.size());
         final List<Button> buttonList = new ArrayList<>();
 
-        for (int i = 0; i < firstArray.size(); i++) {
+        final int firstCount = firstArray.size();
+        int secondCount = secondArray.size();
+
+        for (int i = 0; i < firstCount; i++) {
             String text = firstArray.get(i);
             final Button myButton = new Button(GameActivity.this);
             myButton.setTag("Group1" + i);
@@ -60,7 +63,7 @@ public class GameActivity extends AppCompatActivity {
             myButton.startAnimation(animation);
         }
 
-        for (int i = 0; i < firstArray.size(); i++)
+        for (int i = 0; i < firstCount; i++)
         {
             LinearLayout ll = (LinearLayout) findViewById(R.id.llGroup1);
             LinearLayout.LayoutParams llParams = new LinearLayout.LayoutParams(
@@ -71,7 +74,7 @@ public class GameActivity extends AppCompatActivity {
 
         buttonList.clear();
 
-        for (int i = 0; i < secondArray.size(); i++) {
+        for (int i = 0; i < secondCount; i++) {
             String text = secondArray.get(i);
             final Button myButton = new Button(GameActivity.this);
             myButton.setTag("Group2" + i);
@@ -80,7 +83,6 @@ public class GameActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     chosed[1] = myButton.getText().toString();
-                    // int indexFirst = firstArray.indexOf(chosed[0]);
                     if (chosed[0] != null) {
                         if (getStringPos(chosed[0], 1) == getStringPos(chosed[1], 2)) {
                             isChosed[0] = false;
@@ -99,8 +101,6 @@ public class GameActivity extends AppCompatActivity {
 
                             Log.d("GameActivity", b.getText().toString() + " " + bB.getText().toString());
 
-                            final int backupColor = b.getSolidColor();
-
                             Animation shakeAnim = AnimationUtils.loadAnimation(GameActivity.this, R.anim.shake);
                             b.startAnimation(shakeAnim);
                             bB.startAnimation(shakeAnim);
@@ -109,7 +109,7 @@ public class GameActivity extends AppCompatActivity {
                         }
                     }
 
-                    if (isGameFinish(firstArray.size())) {
+                    if (isGameFinish(firstCount)) {
                         new AlertDialog.Builder(GameActivity.this)
                                 .setMessage("Oyun Bitti\n" + failCount + " defa yanıldınız")
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -130,9 +130,9 @@ public class GameActivity extends AppCompatActivity {
             buttonList.add(myButton);
         }
 
-        randomArrangement = generateRandomArray(secondArray.size());
+        randomArrangement = generateRandomArray(secondCount);
 
-        for (int i = 0; i < secondArray.size(); i++)
+        for (int i = 0; i < secondCount; i++)
         {
             LinearLayout ll = (LinearLayout) findViewById(R.id.llGroup2);
             LinearLayout.LayoutParams llParams = new LinearLayout.LayoutParams(
@@ -194,7 +194,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void clearChosedArray() {
-        for (int i = 0; i < chosed.length; i++) {
+        int chosedCount = chosed.length;
+        for (int i = 0; i < chosedCount; i++) {
             chosed[i] = null;
         }
     }
@@ -205,17 +206,16 @@ public class GameActivity extends AppCompatActivity {
         int j = 0, backup;
         Random randomNum = new Random();
 
-        for (int i = 0; i < ourArray.length; i++)
+        for (int i = 0; i < limit; i++)
         {
             ourArray[i] = -1;
         }
 
-        while (j < ourArray.length)
-        {
+        while (j < limit) {
             control = true;
             backup = randomNum.nextInt(limit);
 
-            for (int i = 0; i < ourArray.length; i++)
+            for (int i = 0; i < limit; i++)
             {
                 if (ourArray[i] == backup)
                 {

@@ -35,7 +35,6 @@ import java.util.Random;
 public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdateListener {
 
     private ArrayList<String> firstArray, secondArray;
-    private MyAdapter adapter;
     private Project project;
     private ListView l1, l2;
     private List<Matchs> myMatchsArray;
@@ -49,8 +48,6 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         project = new Project();
         project.setName(getIntent().getExtras().getString("name"));
         project.setCreate_date(getIntent().getExtras().getString("date"));
-
-        // Log.d("baris", project.getName() + " " + date);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(project.getName());
@@ -189,7 +186,7 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
             firstArray.add(i, first);
             secondArray.add(i, second);
         }
-        adapter = new MyAdapter(this, firstArray);
+        MyAdapter adapter = new MyAdapter(this, firstArray);
         l1.setAdapter(adapter);
         adapter.notifyDataSetChanged();
         adapter = new MyAdapter(this, secondArray);
@@ -197,20 +194,15 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         adapter.notifyDataSetChanged();
     }
 
-    private long saveToDb(String first, String second) {
+    private void saveToDb(String first, String second) {
         Matchs myMatchs = new Matchs();
         myMatchs.setFirst(first);
         myMatchs.setSecond(second);
         myMatchs.setCreate_date(project.getCreate_date());
 
         Matchings db = new Matchings(NewMatchActivity.this);
-
-        long r = db.createMatchs(myMatchs);
+        db.createMatchs(myMatchs);
         db.close();
-
-        Toast.makeText(NewMatchActivity.this, "Eklendi", Toast.LENGTH_SHORT).show();
-
-        return r;
     }
 
     private void addListFromDb(String createDate)
@@ -221,7 +213,9 @@ public class NewMatchActivity extends AppCompatActivity implements NewMatchUpdat
         firstArray.clear();
         secondArray.clear();
 
-        for (int i = 0; i < myMatchsArray.size(); i++)
+        int myMatchsCount = myMatchsArray.size();
+
+        for (int i = 0; i < myMatchsCount; i++)
         {
             int whereShortLine = myMatchsArray.get(i).getFirst().indexOf("-");
             String first = myMatchsArray.get(i).getFirst().substring(0, whereShortLine);

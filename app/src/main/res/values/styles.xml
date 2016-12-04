@@ -10,4 +10,15 @@
         -->
     </style>
 
+    <style name="AppPrefsTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:padding">2dp</item>
+        <!-- Customize your theme here.
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        -->
+    </style>
+
+
 </resources>

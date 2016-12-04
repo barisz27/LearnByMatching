@@ -1,8 +1,11 @@
 package com.android.learnbymatching.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
@@ -22,7 +25,6 @@ import android.widget.TextView;
 
 import com.android.learnbymatching.R;
 import com.android.learnbymatching.database.Matchings;
-import com.android.learnbymatching.database.Matchs;
 import com.android.learnbymatching.database.Project;
 import com.android.learnbymatching.dialog.RenameProjectDialogFragment;
 import com.android.learnbymatching.prefs.Prefs;
@@ -31,7 +33,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 
 // بِسْــــــــــــــــــــــمِ اﷲِارَّحْمَنِ ارَّحِيم
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private ListView lvMain;
     private MyAdapter adapter;
-    private List<String> strings, dateStrings;
+    private List<String> projectNames, projectDates;
     private List<Project> projects;
     private String deleteDate = null;
     private String deleteName = null;
@@ -53,30 +54,27 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setContentView(R.layout.activity_main);
 
         lvMain = (ListView) findViewById(R.id.lvMain);
+        tvNoProject = (TextView) findViewById(R.id.tvNoProject);
 
         Matchings db = new Matchings(this);
         projects = db.getAllProjects();
+        db.close();
 
-        if (projects.size() > 0)
-        {
-            TextView tvNoProject = (TextView) findViewById(R.id.tvNoProject);
+        int projectCount = projects.size();
+
+        if (projectCount > 0) {
             tvNoProject.setVisibility(View.INVISIBLE);
         }
 
-        strings = new ArrayList<>();
-        dateStrings = new ArrayList<>();
+        projectNames = new ArrayList<>();
+        projectDates = new ArrayList<>();
 
-        for (int i = 0; i < projects.size(); i++)
-        {
-            Project pro = projects.get(i);
-            String data = pro.getName();
-            String date = pro.getCreate_date();
-
-            strings.add(data);
-            dateStrings.add(date);
+        for (Project pro : projects) {
+            projectNames.add(pro.getName());
+            projectDates.add(pro.getCreate_date());
         }
 
-        adapter = new MyAdapter(MainActivity.this, strings, dateStrings);
+        adapter = new MyAdapter(MainActivity.this, projectNames, projectDates);
         lvMain.setAdapter(adapter);
     }
 
@@ -86,28 +84,23 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         projects = db.getAllProjects();
         db.close();
 
-        if (projects.size() != 0)
-        {
-            tvNoProject = (TextView) findViewById(R.id.tvNoProject);
+        int projectCount = projects.size();
+
+        if (projectCount != 0) {
             tvNoProject.setVisibility(View.INVISIBLE);
         }
 
-        strings = new ArrayList<>();
-        dateStrings = new ArrayList<>();
+        projectNames.clear();
+        projectDates.clear();
 
-        for (int i = 0; i < projects.size(); i++)
-        {
-            Project pro = projects.get(i);
-            String data = pro.getName();
-            String date = pro.getCreate_date();
-
-            strings.add(data);
-            dateStrings.add(date);
+        for (Project pro : projects) {
+            projectNames.add(pro.getName());
+            projectDates.add(pro.getCreate_date());
         }
 
-        adapter = new MyAdapter(this, strings, dateStrings);
-        adapter.notifyDataSetChanged();
+        adapter = new MyAdapter(this, projectNames, projectDates);
         lvMain.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -165,25 +158,24 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private class MyAdapter extends BaseAdapter {
 
-        // private String[] array, array2, array3;
-        private List<String> arrayList = new ArrayList<>();
+        private List<String> nameList = new ArrayList<>();
         private List<String> dateList = new ArrayList<>();
         private Context context;
 
-        MyAdapter(Context context, List<String> arrayList, List<String> dateList) {
+        MyAdapter(Context context, List<String> nameList, List<String> dateList) {
             this.context = context;
-            this.arrayList = arrayList;
+            this.nameList = nameList;
             this.dateList = dateList;
         }
 
         @Override
         public int getCount() {
-            return arrayList.size();
+            return nameList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return arrayList.get(position);
+            return nameList.get(position);
         }
 
         @Override
@@ -200,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
 
             TextView tvMatchingTitle = (TextView) convertView.findViewById(R.id.tvMatchingTitle);
-            tvMatchingTitle.setText(arrayList.get(position));
+            tvMatchingTitle.setText(nameList.get(position));
 
             TextView tvMatchingDate = (TextView) convertView.findViewById(R.id.tvMatchingDate);
             tvMatchingDate.setText(dateList.get(position));
@@ -243,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-    public static String getFullTime(){ // tarih + saat gösterir..
+    public static String getFullTime(){
         String fullTime;
         Calendar c = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -269,11 +261,15 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         } else if (item.getItemId() == R.id.menu_shake) {
             Animation anim = AnimationUtils.loadAnimation(this, R.anim.shake);
             lvMain.startAnimation(anim);
+            return false;
         } else if (item.getItemId() == R.id.menu_prefs) {
             startActivity(new Intent(MainActivity.this, Prefs.class));
+            return false;
         } else if (item.getItemId() == R.id.menu_move) {
-            Animation animation = AnimationUtils.loadAnimation(this, R.anim.move);
-            lvMain.startAnimation(animation);
+            /*Animation animation = AnimationUtils.loadAnimation(this, R.anim.move);
+            lvMain.startAnimation(animation);*/
+            startActivity(new Intent("android.intent.action.SHOW_BRIGHTNESS_DIALOG"));
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -297,5 +293,32 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private void showRenameDialog(String project_date){
         RenameProjectDialogFragment dialogFragment = RenameProjectDialogFragment.newInstance(project_date, deleteName);
         dialogFragment.show(getFragmentManager(), "RenameProjectDialogFragment");
+    }
+
+    @Override
+    public void onBackPressed() {
+        boolean isAsk;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        isAsk = preferences.getBoolean("PREF_ASK_WHILE_CLOSING", true);
+        if (isAsk) {
+            new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Uygulamadan çıkılıyor..")
+                            .setCancelable(false)
+                    .setIcon(getResources().getDrawable(android.R.drawable.ic_dialog_alert))
+                            .setMessage("Çıkmak istediğinize emin misiniz?")
+                            .setPositiveButton("Evet", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    MainActivity.this.finish();
+                                }
+                            }).setNegativeButton("İptal", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            }).show();
+        } else {
+            MainActivity.this.finish();
+        }
     }
 }

@@ -2,15 +2,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <CheckBoxPreference
-        android:defaultValue="false"
-        android:title="Check box preference"
-        android:key="check_box_preference_1" />
-    <SwitchPreference
-        android:defaultValue="false"
-        android:title="Switch preference"
-        android:key="switch_preference_1" />
-    <SwitchPreference
-        android:defaultValue="false"
-        android:title="Switch preference"
-        android:key="switch_preference_2" />
+        android:defaultValue="true"
+        android:title="Çıkarken sor"
+        android:key="PREF_ASK_WHILE_CLOSING" />
+
 </PreferenceScreen>

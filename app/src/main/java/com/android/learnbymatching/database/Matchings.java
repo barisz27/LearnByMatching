@@ -96,6 +96,8 @@ public class Matchings extends SQLiteOpenHelper {
         project.setName(c.getString(c.getColumnIndex(KEY_NAME)));
         project.setCreate_date(c.getString(c.getColumnIndex(KEY_CREATE_DATE)));
 
+        c.close();
+
         return project;
     }
 
@@ -135,6 +137,8 @@ public class Matchings extends SQLiteOpenHelper {
         matchs.setSecond(c.getString(c.getColumnIndex(KEY_MATCH)));
         matchs.setCreate_date(c.getString(c.getColumnIndex(KEY_CREATE_DATE)));
 
+        c.close();
+
         return matchs;
     }
 
@@ -161,6 +165,8 @@ public class Matchings extends SQLiteOpenHelper {
                 projects.add(p);
             } while (c.moveToNext());
         }
+
+        c.close();
 
         return projects;
     }
@@ -190,6 +196,7 @@ public class Matchings extends SQLiteOpenHelper {
             } while (c.moveToNext());
         }
 
+        c.close();
         return matchs;
     }
 

@@ -3,6 +3,7 @@
 
     <header android:fragment="com.android.learnbymatching.prefs.GeneralPreferences"
         android:title="General"
+        android:icon="@drawable/wrench"
         android:summary="Screen options" />
 
 </preference-headers>
